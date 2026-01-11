@@ -58,9 +58,9 @@ public class ProductServiceUnitTests {
                 5,  // available
                 ProductType.SEASONAL,
                 "Jacket",
+                null,
                 today.minusDays(1),
-                today.plusDays(5),
-                null
+                today.plusDays(5)
         );
 
         productService.processSeasonalProduct(product);
@@ -74,7 +74,7 @@ public class ProductServiceUnitTests {
     public void testProcessSeasonalProductOutOfSeasonBeforeStart() {
         LocalDate today = LocalDate.now();
         Product product = new Product(null, 2, 5, ProductType.SEASONAL, "Jacket",
-                today.plusDays(5), today.plusDays(10), null);
+                null, today.plusDays(5), today.plusDays(10));
 
         Mockito.when(productRepository.save(product)).thenReturn(product);
 
@@ -89,8 +89,8 @@ public class ProductServiceUnitTests {
     @Test
     public void testProcessSeasonalProductOutOfSeasonLeadTimeExceeds() {
         LocalDate today = LocalDate.now();
-        Product product = new Product(null, 10, 5, ProductType.SEASONAL, "Jacket",
-                today.minusDays(1), today.plusDays(5), null);
+        Product product = new Product(null, 10, 0, ProductType.SEASONAL, "Jacket",
+                null, today.minusDays(1), today.plusDays(5));
 
         Mockito.when(productRepository.save(product)).thenReturn(product);
 
@@ -99,14 +99,14 @@ public class ProductServiceUnitTests {
         assertEquals(0, product.getAvailable());
         Mockito.verify(productRepository, Mockito.times(1)).save(product);
         Mockito.verify(notificationService, Mockito.times(1))
-                .sendDelayNotification(product.getLeadTime(), product.getName());
+                .sendOutOfStockNotification(product.getName());
     }
 
     // Expirable Product --------------------
     @Test
     public void testProcessExpirableProductValid() {
         Product product = new Product(null, 0, 5, ProductType.EXPIRABLE, "Milk",
-                null, null, LocalDate.now().plusDays(2));
+                LocalDate.now().plusDays(2), null, null);
 
         Mockito.when(productRepository.save(product)).thenReturn(product);
 
@@ -120,7 +120,7 @@ public class ProductServiceUnitTests {
     @Test
     public void testProcessExpirableProductExpired() {
         Product product = new Product(null, 0, 5, ProductType.EXPIRABLE, "Milk",
-                null, null, LocalDate.now().minusDays(1));
+                LocalDate.now().minusDays(1), null, null);
 
         Mockito.when(productRepository.save(product)).thenReturn(product);
 

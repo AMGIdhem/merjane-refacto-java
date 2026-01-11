@@ -99,6 +99,12 @@ public class OrderIntegrationTests {
         Order resultOrder = orderRepository.findById(order.getId())
                 .orElseThrow(() -> new AssertionError("Order not found"));
 
+        Product savedProductUSBCable = productRepository.findById(products.get(0).getId()).get();
+        Product savedProductUSBC = productRepository.findById(products.get(1).getId()).get();
+
+        assertEquals(1, (int) savedProductUSBCable.getAvailable());
+        assertEquals(0, (int) savedProductUSBC.getAvailable());
+
         assertEquals(order.getId(), resultOrder.getId());
     }
 
@@ -109,7 +115,7 @@ public class OrderIntegrationTests {
 
         Product butter = new Product(null, 15, 30, ProductType.EXPIRABLE, "Butter", today.plusDays(5), null,
                 LocalDate.now().plusDays(5));
-        Product milk = new Product(null, 90, 6, ProductType.EXPIRABLE, "Milk", today.plusDays(5), null,
+        Product milk = new Product(null, 90, 6, ProductType.EXPIRABLE, "Milk", today.minusDays(5), null,
                 LocalDate.now().minusDays(1)); // expired
         productRepository.saveAll(List.of(butter, milk));
 
